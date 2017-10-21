@@ -1,0 +1,9 @@
+12:48:42 **** Incremental Build of configuration Default for project cgreen_test ****
+make all 
+g++ -I../../cgreen/include -I../../cgreen/include/cgreen/internal -I../lpc1758_freertos/L0_LowLevel -I../lpc1758_freertos/L1_FreeRTOS -I../lpc1758_freertos/L1_FreeRTOS/include -I../lpc1758_freertos/L1_FreeRTOS/hooks -I../lpc1758_freertos/L1_FreeRTOS/MemMang -I../lpc1758_freertos/L1_FreeRTOS/portable -I../lpc1758_freertos/L1_FreeRTOS/portable/mpu -I../lpc1758_freertos/L2_Drivers/base -I../lpc1758_freertos/L3_Utils -I../lpc1758_freertos/L3_Utils/tlm -I../lpc1758_freertos/L4_IO -I../lpc1758_freertos/L4_IO/fat -I../lpc1758_freertos/L4_IO/fat/disk -I../lpc1758_freertos/L4_IO/fat/option -I../lpc1758_freertos/L4_IO/wireless -I../lpc1758_freertos/L5_Application -I../lpc1758_freertos/L5_Application -I../lpc1758_freertos/L5_Application/examples -I../lpc1758_freertos/L5_Application/periodic_scheduler -Iexample  -Wall -g test_main.o c_list.o foo.o -o test_all -L../../cgreen -lcgreen
+test_main.o: file not recognized: File format not recognized
+collect2.exe: error: ld returned 1 exit status
+make: *** [test_all] Error 1
+
+12:48:42 Build Finished (took 363ms)
+

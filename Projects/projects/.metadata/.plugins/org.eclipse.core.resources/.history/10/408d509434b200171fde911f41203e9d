@@ -1,0 +1,43 @@
+VERSION ""
+
+NS_ :
+	BA_
+	BA_DEF_
+	BA_DEF_DEF_
+	BA_DEF_DEF_REL_
+	BA_DEF_REL_
+	BA_DEF_SGTYPE_
+	BA_REL_
+	BA_SGTYPE_
+	BO_TX_BU_
+	BU_BO_REL_
+	BU_EV_REL_
+	BU_SG_REL_
+	CAT_
+	CAT_DEF_
+	CM_
+	ENVVAR_DATA_
+	EV_DATA_
+	FILTER
+	NS_DESC_
+	SGTYPE_
+	SGTYPE_VAL_
+	SG_MUL_VAL_
+	SIGTYPE_VALTYPE_
+	SIG_GROUP_
+	SIG_TYPE_REF_
+	SIG_VALTYPE_
+	VAL_
+	VAL_TABLE_
+
+BS_:
+
+BU_: DBG DRIVER IO MOTOR SENSOR
+
+
+BO_ 501 DBC_Motor_On: 8 DRIVER
+ SG_ motor_on_test : 0|8@1+ (1,0) [0|0] "" DBG
+ 
+BO_ 503 DBC_Motor_Off: 8 DRIVER
+ SG_ motor_off_test : 0|8@1+ (1,0) [0|0] "" DBG
+

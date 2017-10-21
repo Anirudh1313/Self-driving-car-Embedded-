@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Delete resource &apos;cgreen_test/code/test_pwm&apos;" deleteContents="false" description="Delete resource &apos;cgreen_test/code/test_pwm&apos;" element1="/cgreen_test/code/test_pwm" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1507050354113"/>&#x0A;<refactoring comment="Delete resource &apos;cgreen_test/test_pwm&apos;" deleteContents="false" description="Delete resource &apos;cgreen_test/test_pwm&apos;" element1="/cgreen_test/test_pwm" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1507050388229"/>
+</session>
