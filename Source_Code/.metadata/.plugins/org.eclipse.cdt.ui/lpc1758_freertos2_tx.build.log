@@ -1,0 +1,13 @@
+20:16:12 **** Incremental Build of configuration _build_with_dbc for project lpc1758_freertos2_tx ****
+make -j4 pre-build main-build 
+sh ../pre_build.sh
+Invoking: Cross ARM GNU Print Size
+arm-none-eabi-size --format=berkeley "lpc1758_freertos2_tx.elf"
+ 
+   text	   data	    bss	    dec	    hex	filename
+  89412	    756	   1168	  91336	  164c8	lpc1758_freertos2_tx.elf
+Finished building: lpc1758_freertos2_tx.siz
+ 
+
+20:16:13 Build Finished (took 1s.55ms)
+
