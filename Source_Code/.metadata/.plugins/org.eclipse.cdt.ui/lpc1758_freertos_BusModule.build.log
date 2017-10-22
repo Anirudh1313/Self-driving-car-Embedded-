@@ -1,0 +1,45 @@
+18:33:17 **** Build of configuration _build for project lpc1758_freertos_BusModule ****
+make all 
+cgreen/tests/subdir.mk:151: warning: overriding recipe for target 'cgreen/tests/assertion_tests.o'
+cgreen/tests/subdir.mk:144: warning: ignoring old recipe for target 'cgreen/tests/assertion_tests.o'
+cgreen/tests/subdir.mk:165: warning: overriding recipe for target 'cgreen/tests/breadcrumb_tests.o'
+cgreen/tests/subdir.mk:158: warning: ignoring old recipe for target 'cgreen/tests/breadcrumb_tests.o'
+cgreen/tests/subdir.mk:179: warning: overriding recipe for target 'cgreen/tests/cdash_reporter_tests.o'
+cgreen/tests/subdir.mk:172: warning: ignoring old recipe for target 'cgreen/tests/cdash_reporter_tests.o'
+cgreen/tests/subdir.mk:200: warning: overriding recipe for target 'cgreen/tests/constraint_tests.o'
+cgreen/tests/subdir.mk:193: warning: ignoring old recipe for target 'cgreen/tests/constraint_tests.o'
+cgreen/tests/subdir.mk:221: warning: overriding recipe for target 'cgreen/tests/cute_reporter_tests.o'
+cgreen/tests/subdir.mk:214: warning: ignoring old recipe for target 'cgreen/tests/cute_reporter_tests.o'
+cgreen/tests/subdir.mk:235: warning: overriding recipe for target 'cgreen/tests/environment_variables_tests.o'
+cgreen/tests/subdir.mk:228: warning: ignoring old recipe for target 'cgreen/tests/environment_variables_tests.o'
+cgreen/tests/subdir.mk:263: warning: overriding recipe for target 'cgreen/tests/message_formatting_tests.o'
+cgreen/tests/subdir.mk:256: warning: ignoring old recipe for target 'cgreen/tests/message_formatting_tests.o'
+cgreen/tests/subdir.mk:277: warning: overriding recipe for target 'cgreen/tests/messaging_tests.o'
+cgreen/tests/subdir.mk:270: warning: ignoring old recipe for target 'cgreen/tests/messaging_tests.o'
+cgreen/tests/subdir.mk:298: warning: overriding recipe for target 'cgreen/tests/mocks_tests.o'
+cgreen/tests/subdir.mk:291: warning: ignoring old recipe for target 'cgreen/tests/mocks_tests.o'
+cgreen/tests/subdir.mk:312: warning: overriding recipe for target 'cgreen/tests/parameters_tests.o'
+cgreen/tests/subdir.mk:305: warning: ignoring old recipe for target 'cgreen/tests/parameters_tests.o'
+cgreen/tests/subdir.mk:326: warning: overriding recipe for target 'cgreen/tests/reflective_runner_no_teardown_tests.o'
+cgreen/tests/subdir.mk:319: warning: ignoring old recipe for target 'cgreen/tests/reflective_runner_no_teardown_tests.o'
+cgreen/tests/subdir.mk:340: warning: overriding recipe for target 'cgreen/tests/reflective_tests.o'
+cgreen/tests/subdir.mk:333: warning: ignoring old recipe for target 'cgreen/tests/reflective_tests.o'
+cgreen/tests/subdir.mk:354: warning: overriding recipe for target 'cgreen/tests/text_reporter_tests.o'
+cgreen/tests/subdir.mk:347: warning: ignoring old recipe for target 'cgreen/tests/text_reporter_tests.o'
+cgreen/tests/subdir.mk:368: warning: overriding recipe for target 'cgreen/tests/unit_tests.o'
+cgreen/tests/subdir.mk:361: warning: ignoring old recipe for target 'cgreen/tests/unit_tests.o'
+cgreen/tests/subdir.mk:382: warning: overriding recipe for target 'cgreen/tests/vector_tests.o'
+cgreen/tests/subdir.mk:375: warning: ignoring old recipe for target 'cgreen/tests/vector_tests.o'
+cgreen/tests/subdir.mk:396: warning: overriding recipe for target 'cgreen/tests/xml_reporter_tests.o'
+cgreen/tests/subdir.mk:389: warning: ignoring old recipe for target 'cgreen/tests/xml_reporter_tests.o'
+Building file: ../newlib/malloc_lock.c
+Invoking: Cygwin C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"newlib/malloc_lock.d" -MT"newlib/malloc_lock.o" -o "newlib/malloc_lock.o" "../newlib/malloc_lock.c"
+../newlib/malloc_lock.c:19:22: fatal error: FreeRTOS.h: No such file or directory
+ #include "FreeRTOS.h"
+                      ^
+compilation terminated.
+make: *** [newlib/subdir.mk:33: newlib/malloc_lock.o] Error 1
+
+18:33:18 Build Finished (took 1s.718ms)
+

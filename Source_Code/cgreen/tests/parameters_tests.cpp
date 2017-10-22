@@ -1,1 +1,0 @@
-parameters_tests.c

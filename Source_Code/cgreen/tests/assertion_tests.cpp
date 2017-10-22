@@ -1,1 +1,0 @@
-assertion_tests.c

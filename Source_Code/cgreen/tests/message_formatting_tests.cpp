@@ -1,1 +1,0 @@
-message_formatting_tests.c
