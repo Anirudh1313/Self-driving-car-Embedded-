@@ -57,9 +57,9 @@ const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
 {
-    CAN_init(can1, 100, 5, 5, NULL, NULL);
+    CAN_init(can2, 100, 5, 5, NULL, NULL);
     CAN_bypass_filter_accept_all_msgs();
-    CAN_reset_bus(can1);
+    CAN_reset_bus(can2);
     return true; // Must return true upon success
 }
 
@@ -75,8 +75,8 @@ bool period_reg_tlm(void)
 void period_1Hz(uint32_t count)
 {
     //LE.toggle(1);
-    if (CAN_is_bus_off(can1))
-        CAN_reset_bus(can1);
+    if (CAN_is_bus_off(can2))
+        CAN_reset_bus(can2);
 }
 
 void period_10Hz(uint32_t count)
@@ -84,7 +84,7 @@ void period_10Hz(uint32_t count)
     MOTOR_SIGNAL_t motor_data_received = {0};
 
     can_msg_t message = {0};
-    CAN_rx(can1, &message, 10);
+    CAN_rx(can2, &message, 10);
 
     dbc_msg_hdr_t header_motors = {0};
     header_motors.mid = message.msg_id;
