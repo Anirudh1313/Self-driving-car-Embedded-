@@ -96,7 +96,7 @@ bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
 }
 void period_10Hz(uint32_t count)
 {
-	MOTOR_SIGNAL_t motor_msg = {0};
+	MOTOR_SIGNAL_t motor_msg = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	if(SW_obj.getSwitch(1))
 	{
@@ -118,6 +118,7 @@ void period_10Hz(uint32_t count)
 	{
 		motor_msg.MOTOR_DRIVE_SPEED = 15;
 		motor_msg.MOTOR_DRIVE_FORWARD = 1;
+		u0_dbg_printf("forward");
 	}
 	else if(SW_obj.getSwitch(4))
 	{
@@ -129,20 +130,18 @@ void period_10Hz(uint32_t count)
 		motor_msg.MOTOR_DRIVE_SPEED = 20;
 		motor_msg.MOTOR_DRIVE_NEUTRAL = 1;
 	}
-	if(dbc_encode_and_send_MOTOR_SIGNAL(&motor_msg))
-	{
-		u0_dbg_printf("Data Sent");
-	}
+
+	dbc_encode_and_send_MOTOR_SIGNAL(&motor_msg);
 }
 
 void period_100Hz(uint32_t count)
 {
-    LE.toggle(3);
+   // LE.toggle(3);
 }
 
 // 1Khz (1ms) is only run if Periodic Dispatcher was configured to run it at main():
 // scheduler_add_task(new periodicSchedulerTask(run_1Khz = true));
 void period_1000Hz(uint32_t count)
 {
-    LE.toggle(4);
+  //  LE.toggle(4);
 }

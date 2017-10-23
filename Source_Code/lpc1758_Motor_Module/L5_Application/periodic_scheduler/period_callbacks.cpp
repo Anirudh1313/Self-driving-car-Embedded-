@@ -81,17 +81,22 @@ void period_1Hz(uint32_t count)
 
 void period_10Hz(uint32_t count)
 {
-    MOTOR_SIGNAL_t motor_data_received = {0};
+    MOTOR_SIGNAL_t motor_data_received = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     can_msg_t message = {0};
     CAN_rx(can2, &message, 10);
+    LE.set(1, 0);
+    LE.set(2, 0);
+    LE.set(3, 0);
+    LE.set(4, 0);
 
     dbc_msg_hdr_t header_motors = {0};
+
     header_motors.mid = message.msg_id;
     header_motors.dlc = message.frame_fields.data_len;
     dbc_decode_MOTOR_SIGNAL(&motor_data_received, message.data.bytes, &header_motors);
 
-    dbc_handle_mia_MOTOR_SIGNAL(&motor_data_received, 10);
+    //dbc_handle_mia_MOTOR_SIGNAL(&motor_data_received, 1);
 
 
     if(motor_data_received.MOTOR_STEER_FULL_LEFT)
@@ -103,15 +108,11 @@ void period_10Hz(uint32_t count)
 
 
     if(motor_data_received.MOTOR_DRIVE_FORWARD)
-    {
         LE.set(3, dc_motor_drive (forward_drive, motor_data_received.MOTOR_DRIVE_SPEED));
-    }
     else if(motor_data_received.MOTOR_DRIVE_REVERSE)
-    {
         LE.set(4, dc_motor_drive (reverse_drive, motor_data_received.MOTOR_DRIVE_SPEED));
-    }
     else
-       dc_motor_drive (neutral_drive, motor_data_received.MOTOR_DRIVE_SPEED);
+    	dc_motor_drive (neutral_drive, motor_data_received.MOTOR_DRIVE_SPEED);
 }
 
 void period_100Hz(uint32_t count)

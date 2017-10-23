@@ -1,4 +1,4 @@
-21:53:28 **** Incremental Build of configuration _build_with_dbc for project lpc1758_Master_Module ****
+11:09:31 **** Incremental Build of configuration _build_with_dbc for project lpc1758_Master_Module ****
 make -j4 pre-build main-build 
 sh ../pre_build.sh
 Building file: ../L5_Application/periodic_scheduler/period_callbacks.cpp
@@ -17,13 +17,13 @@ Create binary file
 arm-none-eabi-objcopy -O binary lpc1758_Master_Module.elf lpc1758_Master_Module.bin
  
 Invoking: Cross ARM GNU Create Flash Image
+Invoking: Cross ARM GNU Create Listing
 arm-none-eabi-objcopy -O ihex "lpc1758_Master_Module.elf"  "lpc1758_Master_Module.hex"
 Invoking: Cross ARM GNU Print Size
-Invoking: Cross ARM GNU Create Listing
-arm-none-eabi-size --format=berkeley "lpc1758_Master_Module.elf"
 arm-none-eabi-objdump --source --all-headers --demangle --line-numbers --wide "lpc1758_Master_Module.elf" > "lpc1758_Master_Module.lst"
+arm-none-eabi-size --format=berkeley "lpc1758_Master_Module.elf"
    text	   data	    bss	    dec	    hex	filename
-  89448	    756	   1176	  91380	  164f4	lpc1758_Master_Module.elf
+  91288	    756	   1240	  93284	  16c64	lpc1758_Master_Module.elf
 Finished building: lpc1758_Master_Module.siz
 Finished building: lpc1758_Master_Module.hex
  
@@ -31,5 +31,5 @@ Finished building: lpc1758_Master_Module.hex
 Finished building: lpc1758_Master_Module.lst
  
 
-21:53:31 Build Finished (took 3s.45ms)
+11:09:36 Build Finished (took 4s.767ms)
 
