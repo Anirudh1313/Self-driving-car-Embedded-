@@ -29,19 +29,15 @@
  */
 
 #include <stdint.h>
-#include "printf_lib.h"
 #include "io.hpp"
 #include "periodic_callback.h"
-#include "lpc_pwm.hpp"
-#include "stdio.h"
-#include "gpio.hpp"
-#include "utilities.h"
-#include "can.h"
-#include "motors_module.h"
 #include "_can_dbc/generated_can.h"
+#include "can.h"
+#include "switches.hpp"
+#include "string.h"
+#include "printf_lib.h"
 
-const uint32_t                             MOTOR_SIGNAL__MIA_MS = 0;
-const MOTOR_SIGNAL_t                       MOTOR_SIGNAL__MIA_MSG = {0};     // Change default values later.
+Switches& SW_obj = Switches::getInstance();
 
 /// This is the stack size used for each of the period tasks (1Hz, 10Hz, 100Hz, and 1000Hz)
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
@@ -57,10 +53,14 @@ const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
 {
-    CAN_init(can1, 100, 5, 5, NULL, NULL);
-    CAN_bypass_filter_accept_all_msgs();
-    CAN_reset_bus(can1);
-    return true; // Must return true upon success
+	SW_obj.init();
+	//initializing the CAN bus
+	CAN_init(can2, 100, 5, 5, nullptr, nullptr);
+	//if receiving enable this code
+	CAN_bypass_filter_accept_all_msgs();
+	//resetting
+	CAN_reset_bus(can2);
+	return true; // Must return true upon success
 }
 
 /// Register any telemetry variables
@@ -70,59 +70,79 @@ bool period_reg_tlm(void)
     return true; // Must return true upon success
 }
 
-
+/**
+ * Below are your periodic functions.
+ * The argument 'count' is the number of times each periodic task is called.
+ */
 
 void period_1Hz(uint32_t count)
 {
-    //LE.toggle(1);
-    if (CAN_is_bus_off(can1))
-        CAN_reset_bus(can1);
+	if(CAN_is_bus_off(can2))
+		CAN_reset_bus(can2);
 }
 
+bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
+{
+	can_msg_t msg;
+	msg.msg_id = mid;
+	msg.frame_fields.data_len = dlc;
+	msg.frame_fields.is_29bit = 0;
+	msg.frame_fields.is_rtr = 0;
+
+	memcpy(msg.data.bytes, bytes, dlc);
+
+	return CAN_tx(can2, &msg , 10);
+
+}
 void period_10Hz(uint32_t count)
 {
-    MOTOR_SIGNAL_t motor_data_received = {0};
+	MOTOR_SIGNAL_t motor_msg = {0};
 
-    can_msg_t message = {0};
-    CAN_rx(can1, &message, 10);
+	if(SW_obj.getSwitch(1))
+	{
+		motor_msg.MOTOR_STEER_ANGLE = 10.1;
+		motor_msg.MOTOR_STEER_FULL_LEFT = 1;
+	}
+	else if(SW_obj.getSwitch(2))
+	{
+		motor_msg.MOTOR_STEER_ANGLE = 19.8;
+		motor_msg.MOTOR_STEER_FULL_RIGHT = 1;
+	}
+	else
+	{
+		motor_msg.MOTOR_STEER_ANGLE = 15.1;
+		motor_msg.MOTOR_STEER_STRAIGHT = 1;
+	}
 
-    dbc_msg_hdr_t header_motors = {0};
-    header_motors.mid = message.msg_id;
-    header_motors.dlc = message.frame_fields.data_len;
-    dbc_decode_MOTOR_SIGNAL(&motor_data_received, message.data.bytes, &header_motors);
-
-    dbc_handle_mia_MOTOR_SIGNAL(&motor_data_received, 10);
-
-
-    if(motor_data_received.MOTOR_STEER_FULL_LEFT)
-        LE.set(1, servo_motor_steer_angle (left_dir, motor_data_received.MOTOR_STEER_ANGLE));
-    else if(motor_data_received.MOTOR_STEER_FULL_RIGHT)
-        LE.set(2, servo_motor_steer_angle (right_dir, motor_data_received.MOTOR_STEER_ANGLE));
-    else
-        servo_motor_steer_angle (straight_dir, motor_data_received.MOTOR_STEER_ANGLE);
-
-
-    if(motor_data_received.MOTOR_DRIVE_FORWARD)
-    {
-        LE.set(3, dc_motor_drive (forward_drive, motor_data_received.MOTOR_DRIVE_SPEED));
-    }
-    else if(motor_data_received.MOTOR_DRIVE_REVERSE)
-    {
-        LE.set(4, dc_motor_drive (reverse_drive, motor_data_received.MOTOR_DRIVE_SPEED));
-    }
-    else
-       dc_motor_drive (neutral_drive, motor_data_received.MOTOR_DRIVE_SPEED);
+	if(SW_obj.getSwitch(3))
+	{
+		motor_msg.MOTOR_DRIVE_SPEED = 15;
+		motor_msg.MOTOR_DRIVE_FORWARD = 1;
+	}
+	else if(SW_obj.getSwitch(4))
+	{
+		motor_msg.MOTOR_DRIVE_SPEED = 10;
+		motor_msg.MOTOR_DRIVE_REVERSE = 1;
+	}
+	else
+	{
+		motor_msg.MOTOR_DRIVE_SPEED = 20;
+		motor_msg.MOTOR_DRIVE_NEUTRAL = 1;
+	}
+	if(dbc_encode_and_send_MOTOR_SIGNAL(&motor_msg))
+	{
+		u0_dbg_printf("Data Sent");
+	}
 }
 
 void period_100Hz(uint32_t count)
 {
-    //LE.toggle(3);
-
+    LE.toggle(3);
 }
 
 // 1Khz (1ms) is only run if Periodic Dispatcher was configured to run it at main():
 // scheduler_add_task(new periodicSchedulerTask(run_1Khz = true));
 void period_1000Hz(uint32_t count)
 {
-    //LE.on(4);
+    LE.toggle(4);
 }
