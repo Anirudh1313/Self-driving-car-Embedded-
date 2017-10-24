@@ -48,6 +48,7 @@
 #include "_can_dbc/generated_can.h"
 #include <string.h>
 
+
 /// This is the stack size used for each of the period tasks (1Hz, 10Hz, 100Hz, and 1000Hz)
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
@@ -59,7 +60,7 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
 //CAN communication
-can_t myCan = can1;
+can_t myCan = can2;
 //POWER UP RIGHT and LEFT SENSOR -VCC
 GPIO vccRt(P0_0);
 GPIO vccLt(P0_1);
@@ -144,7 +145,8 @@ bool period_reg_tlm(void)
 
 void period_1Hz(uint32_t count)
 {
-
+    if(CAN_is_bus_off(can2))
+          CAN_reset_bus(can2);
 }
 
 void period_10Hz(uint32_t count) //100ms
@@ -158,7 +160,7 @@ bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
     can_msg.msg_id= mid;
     can_msg.frame_fields.data_len = dlc;
     memcpy(can_msg.data.bytes, bytes, dlc);
-    return CAN_tx(can1, &can_msg, 0);
+    return CAN_tx(can2, &can_msg, 0);
 }
 
 void period_100Hz(uint32_t count)  //10ms
@@ -179,13 +181,13 @@ void period_100Hz(uint32_t count)  //10ms
         {
             senLt.commandRanging();
             next = middle;
-//            next = back;
-            //sending the CAN message
+ //           next = back;
+//            sending the CAN message
             SENSOR_SONARS_t sen_msg = { 0 };
 
-            sen_msg.SENSOR_SONARS_middle = (uint16_t) senMid.distance;
+            sen_msg.SENSOR_SONARS_middle = (uint16_t)senMid.distance;
             sen_msg.SENSOR_SONARS_left =  (uint16_t)senLt.distance;
-            sen_msg.SENSOR_SONARS_right = (uint16_t) senRt.distance;
+            sen_msg.SENSOR_SONARS_right = (uint16_t)senRt.distance;
             sen_msg.SENSOR_SONARS_rear = 0;
             // This function will encode the CAN data bytes, and send the CAN msg using dbc_app_send_can_msg()
             dbc_encode_and_send_SENSOR_SONARS(&sen_msg);
