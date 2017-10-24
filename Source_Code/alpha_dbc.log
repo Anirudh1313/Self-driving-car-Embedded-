@@ -1,0 +1,12 @@
+Conversion Warnings Log
+
+
+MSG_ID: 100 	MSG_TYPE: S 	MSG_NAME: MOTOR_SIGNAL
+	SIG_NAME: MOTOR_STEER_FULL_LEFT, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_STEER_SLIGHT_LEFT, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_STEER_FULL_RIGHT, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_STEER_SLIGHT_RIGHT, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_STEER_STRAIGHT, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_DRIVE_FORWARD, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_DRIVE_REVERSE, STATUS: Invalid Max or Min value., ACTION: Value Set to default
+	SIG_NAME: MOTOR_DRIVE_NEUTRAL, STATUS: Invalid Max or Min value., ACTION: Value Set to default
