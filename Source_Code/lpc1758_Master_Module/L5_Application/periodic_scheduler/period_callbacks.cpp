@@ -49,6 +49,9 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
  * printf inside these functions, you need about 1500 bytes minimum
  */
 const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
+const uint32_t            SENSOR_SONARS__MIA_MS = 1000;
+const SENSOR_SONARS_t     SENSOR_SONARS__MIA_MSG = { 999,999,999,999 };
+SENSOR_SONARS_t sensor_msg;
 
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
@@ -136,7 +139,33 @@ void period_10Hz(uint32_t count)
 
 void period_100Hz(uint32_t count)
 {
-   // LE.toggle(3);
+
+	can_msg_t sensor;
+	if (!CAN_is_bus_off(can2)) {
+		while (CAN_rx(can2, &sensor, 0)) {
+			dbc_msg_hdr_t can_msg_hdr;
+			can_msg_hdr.dlc = sensor.frame_fields.data_len;
+			can_msg_hdr.mid = sensor.msg_id;
+			dbc_decode_SENSOR_SONARS(&sensor_msg, sensor.data.bytes,
+					&can_msg_hdr);
+			//u0_dbg_printf("L-M-R %d %d %d\n", sensor_msg.SENSOR_SONARS_left,
+			//		sensor_msg.SENSOR_SONARS_middle,
+			//		sensor_msg.SENSOR_SONARS_right);
+			u0_dbg_printf("%d\n",sensor_msg.SENSOR_SONARS_left);
+			 LE.set(1,0);
+		}
+
+		if (dbc_handle_mia_SENSOR_SONARS(&sensor_msg, 10)) {
+			 LE.set(1,1);
+			u0_dbg_printf("MIA\n");
+		}
+	}
+	else
+	{
+		CAN_reset_bus(can2);
+	}
+
+	// LE.toggle(3);
 }
 
 // 1Khz (1ms) is only run if Periodic Dispatcher was configured to run it at main():
