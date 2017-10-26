@@ -1,47 +1,15 @@
-/*
- *     SocialLedge.com - Copyright (C) 2013
- *
- *     This file is part of free software framework for embedded processors.
- *     You can use it and/or distribute it as long as this copyright header
- *     remains unmodified.  The code is free for personal use and requires
- *     permission to use in a commercial product.
- *
- *      THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- *      OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- *      MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- *      I SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
- *      CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- *
- *     You can reach the author of this software at :
- *          p r e e t . w i k i @ g m a i l . c o m
- */
-
-/**
- * @file
- * This contains the period callback functions for the periodic scheduler
- *
- * @warning
- * These callbacks should be used for hard real-time system, and the priority of these
- * tasks are above everything else in the system (above the PRIORITY_CRITICAL).
- * The period functions SHOULD NEVER block and SHOULD NEVER run over their time slot.
- * For example, the 1000Hz take slot runs periodically every 1ms, and whatever you
- * do must be completed within 1ms.  Running over the time slot will reset the system.
- */
-
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "io.hpp"
 #include "periodic_callback.h"
-#include "_can_dbc/generated_can.h"
+#include "uart3.hpp"
 #include "can.h"
-#include "switches.hpp"
-#include "string.h"
 #include "printf_lib.h"
-
-Switches& SW_obj = Switches::getInstance();
+#include "_can_dbc/generated_can.h"
 
 /// This is the stack size used for each of the period tasks (1Hz, 10Hz, 100Hz, and 1000Hz)
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
-
 /**
  * This is the stack size of the dispatcher task that triggers the period tasks to run.
  * Minimum 1500 bytes are needed in order to write a debug file if the period tasks overrun.
@@ -49,20 +17,26 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
  * printf inside these functions, you need about 1500 bytes minimum
  */
 const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
-
+const uint32_t GPS_DESTINATION__MIA_MS = 3000;
+const GPS_DESTINATION_t GPS_DESTINATION__MIA_MSG = {333333 , 212121, 1, 0}; //mia message
+GPS_DESTINATION_t gps_des;
+GPS_CURRENT_LOCATION_t gps_curr;
+can_t can_1 = can1;
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
 {
-	SW_obj.init();
-	//initializing the CAN bus
-	CAN_init(can2, 100, 5, 5, nullptr, nullptr);
-	//if receiving enable this code
-	CAN_bypass_filter_accept_all_msgs();
-	//resetting
-	CAN_reset_bus(can2);
-	return true; // Must return true upon success
+    if(CAN_init(can_1, 100, 500, 500, NULL, NULL))
+    {
+    u0_dbg_printf("init up\n");
+    CAN_reset_bus(can_1);
+    CAN_bypass_filter_accept_all_msgs();
+    }
+    gps_des.GPS_DESTINATION_latitude = 343246;
+    gps_des.GPS_DESTINATION_longitude = 204160;
+    gps_des.mia_info.is_mia = false;
+    gps_des.mia_info.mia_counter_ms = 0;
+    return true; // Must return true upon success
 }
-
 /// Register any telemetry variables
 bool period_reg_tlm(void)
 {
@@ -74,74 +48,65 @@ bool period_reg_tlm(void)
  * Below are your periodic functions.
  * The argument 'count' is the number of times each periodic task is called.
  */
-
 void period_1Hz(uint32_t count)
 {
-	if(CAN_is_bus_off(can2))
-		CAN_reset_bus(can2);
-}
-
-bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
-{
-	can_msg_t msg;
-	msg.msg_id = mid;
-	msg.frame_fields.data_len = dlc;
-	msg.frame_fields.is_29bit = 0;
-	msg.frame_fields.is_rtr = 0;
-
-	memcpy(msg.data.bytes, bytes, dlc);
-
-	return CAN_tx(can2, &msg , 10);
-
+    LE.toggle(1);
+    if(CAN_is_bus_off(can_1))
+    {
+    CAN_reset_bus(can_1);
+    u0_dbg_printf("buss is off, just reseted! \n");
+    }
 }
 void period_10Hz(uint32_t count)
 {
-	MOTOR_SIGNAL_t motor_msg = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-	if(SW_obj.getSwitch(1))
-	{
-		motor_msg.MOTOR_STEER_ANGLE = 10.1;
-		motor_msg.MOTOR_STEER_FULL_LEFT = 1;
-	}
-	else if(SW_obj.getSwitch(2))
-	{
-		motor_msg.MOTOR_STEER_ANGLE = 19.8;
-		motor_msg.MOTOR_STEER_FULL_RIGHT = 1;
-	}
-	else
-	{
-		motor_msg.MOTOR_STEER_ANGLE = 15.1;
-		motor_msg.MOTOR_STEER_STRAIGHT = 1;
-	}
-
-	if(SW_obj.getSwitch(3))
-	{
-		motor_msg.MOTOR_DRIVE_SPEED = 15;
-		motor_msg.MOTOR_DRIVE_FORWARD = 1;
-		u0_dbg_printf("forward");
-	}
-	else if(SW_obj.getSwitch(4))
-	{
-		motor_msg.MOTOR_DRIVE_SPEED = 10;
-		motor_msg.MOTOR_DRIVE_REVERSE = 1;
-	}
-	else
-	{
-		motor_msg.MOTOR_DRIVE_SPEED = 20;
-		motor_msg.MOTOR_DRIVE_NEUTRAL = 1;
-	}
-
-	dbc_encode_and_send_MOTOR_SIGNAL(&motor_msg);
+    //transmitting current location reading obtained from the gps sensor.
+    can_msg_t can_msg_tx;
+    dbc_msg_hdr_t tx_msg_hdr;
+    //srand((unsigned) time(0));
+    //uint32_t rmin = rand() % 100;
+    gps_curr.GPS_CURRENT_LOCATION_latitude = 111111;
+    gps_curr.GPS_CURRENT_LOCATION_longitude = 1222222;
+    tx_msg_hdr = dbc_encode_GPS_CURRENT_LOCATION(can_msg_tx.data.bytes, &gps_curr);
+    can_msg_tx.frame_fields.data_len = tx_msg_hdr.dlc;
+    can_msg_tx.msg_id = tx_msg_hdr.mid;
+    can_msg_tx.frame_fields.is_rtr = 0;
+    can_msg_tx.frame_fields.is_29bit = 0;
+    if(CAN_tx(can1, &can_msg_tx, 4))
+    {
+        //u0_dbg_printf("tx\n");
+        //LE.toggle(2);
+    }
+    //receiving the destination location readings obtained
 }
-
 void period_100Hz(uint32_t count)
 {
-   // LE.toggle(3);
-}
+    LE.toggle(3);
 
+    can_msg_t can_msg;
+    if(CAN_rx(can_1, &can_msg, 2))
+    {
+    dbc_msg_hdr_t msg_hdr;
+    msg_hdr.dlc = can_msg.frame_fields.data_len;
+    msg_hdr.mid = can_msg.msg_id;
+    dbc_decode_GPS_DESTINATION(&gps_des, can_msg.data.bytes, &msg_hdr);
+    u0_dbg_printf("latitude: %f  &  longitude: %f \n",gps_des.GPS_DESTINATION_latitude, gps_des.GPS_DESTINATION_longitude);
+    }
+    // else
+    // {
+    //  u0_dbg_printf("count: %d\n", motor_status.mia_info.mia_counter_ms);
+    // }
+    if(dbc_handle_mia_GPS_DESTINATION(&gps_des, 10))
+    {
+    LE.toggle(1);
+    LE.toggle(2);
+    LE.toggle(3);
+    LE.toggle(4);
+    u0_dbg_printf("latitude-mia: %f  &  longitude-mia: %f \n",gps_des.GPS_DESTINATION_latitude/10000, gps_des.GPS_DESTINATION_longitude/10000);
+    }
+}
 // 1Khz (1ms) is only run if Periodic Dispatcher was configured to run it at main():
 // scheduler_add_task(new periodicSchedulerTask(run_1Khz = true));
 void period_1000Hz(uint32_t count)
 {
-  //  LE.toggle(4);
+    LE.toggle(4);
 }
