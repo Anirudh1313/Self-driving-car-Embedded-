@@ -129,6 +129,6 @@ void sensor::calculateDistance(sensr which)
     old = distance;
     stop = sys_get_uptime_us();
     distance= (stop - start)/147;
-//    if(distance != old)
-//    u0_dbg_printf("%d - %d\n",which, distance);
+    if(distance != old && (distance < 60))
+    u0_dbg_printf("%d - %d\n",which, distance);
 }
