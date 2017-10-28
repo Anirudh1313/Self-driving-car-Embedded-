@@ -129,10 +129,10 @@ void period_100Hz(uint32_t count)
 			u0_dbg_printf("M ");
 		}
 		//Delete this bit
-		/*sensor_msg_decoded.SENSOR_SONARS_left = 130;
+		sensor_msg_decoded.SENSOR_SONARS_left = 130;
 		sensor_msg_decoded.SENSOR_SONARS_middle = 25;
 		sensor_msg_decoded.SENSOR_SONARS_right = 25;
-		*/
+
 		//Call for obstacle avoidance
 		MOTOR_SIGNAL_t motor_msg_to_send = { 0 };
 		motor_msg_to_send = obstacle_avoidance(sensor_msg_decoded);
