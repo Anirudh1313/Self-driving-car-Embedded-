@@ -254,23 +254,23 @@ MOTOR_SIGNAL_t obstacle_avoidance(SENSOR_SONARS_t sensor_msg_decoded)
 		obst_avoided_msg.MOTOR_DRIVE_SPEED = 0;
 		u0_dbg_printf("STP2\n"); //Delete this later
 	}
-	//Right forward -011/012/021/022
+	//Half Right forward -011/012/021/022
 	else if(left_range == 0  && (middle_range == 1 || middle_range == 2)
 			&& (right_range == 1 || right_range == 2))
 	{
 		obst_avoided_msg.MOTOR_DRIVE_FORWARD = 1;
 		obst_avoided_msg.MOTOR_STEER_FULL_RIGHT = 1;
-		obst_avoided_msg.MOTOR_STEER_ANGLE = 19.8;
+		obst_avoided_msg.MOTOR_STEER_ANGLE = 17.5;
 		obst_avoided_msg.MOTOR_DRIVE_SPEED = 15;
 		u0_dbg_printf("RF\n"); //Delete this later
 	}
-	//Left forward - 110/120/210/220
+	//Half Left forward - 110/120/210/220
 	else if((left_range == 1 || left_range == 2)  && (middle_range == 1 || middle_range == 2)
 			&& right_range == 0)
 	{
 		obst_avoided_msg.MOTOR_DRIVE_FORWARD = 1;
 		obst_avoided_msg.MOTOR_STEER_FULL_LEFT = 1;
-		obst_avoided_msg.MOTOR_STEER_ANGLE = 10.1;
+		obst_avoided_msg.MOTOR_STEER_ANGLE = 12.6;
 		obst_avoided_msg.MOTOR_DRIVE_SPEED = 15;
 		u0_dbg_printf("LF\n"); //Delete this later
 	}
