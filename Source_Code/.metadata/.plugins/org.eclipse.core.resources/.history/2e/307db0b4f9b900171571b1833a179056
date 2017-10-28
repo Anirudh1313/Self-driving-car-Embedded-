@@ -1,0 +1,28 @@
+/*
+ * obstacle_avoidance.cpp
+ *
+ *  Created on: Oct 25, 2017
+ *      Author: Sucheta
+ */
+
+#include "obstacle_avoidance.hpp"
+MOTOR_SIGNAL_t obstacle_avoidance(SENSOR_SONARS_t sensor_msg_decoded)
+{
+	/* Ranges: 	Stop range (0): < 20 inches
+	 * 			FullLeft/FullRight range (1): 21 - 110 inches
+	 * 			SlightLeft/SlightRiht range (2): 111 - 200 inches
+	 */
+	int left_range, middle_range, right_range, rear_range;
+	if(left_range)
+	sensor_msg_decoded.
+	MOTOR_SIGNAL_t obst_avoided_msg;
+	return obst_avoided_msg;
+}
+/*
+BO_ 200 SENSOR_SONARS: 8 SENSOR
+ SG_ SENSOR_SONARS_left : 0|16@1+ (1,0) [0|256] "" DRIVER,IO
+ SG_ SENSOR_SONARS_middle : 16|16@1+ (1,0) [0|256] "" DRIVER,IO
+ SG_ SENSOR_SONARS_right : 32|16@1+ (1,0) [0|256] "" DRIVER,IO
+ SG_ SENSOR_SONARS_rear : 48|16@1+ (1,0) [0|256] "" DRIVER,IO
+*/
+
