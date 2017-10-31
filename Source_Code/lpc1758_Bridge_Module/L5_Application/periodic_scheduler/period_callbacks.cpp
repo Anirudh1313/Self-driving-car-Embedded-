@@ -383,6 +383,14 @@
 
 
 
+
+
+
+
+
+
+
+
 /*
  *     SocialLedge.com - Copyright (C) 2013
  *
@@ -423,24 +431,21 @@
 #include <string.h>
 #include "printf_lib.h"
 #include "_can_dbc/generated_can.h"
-//#include "Uart2.h"
+#include "uart2.hpp"
 
 //
-bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
-{
-    can_msg_t can_msg = { 0 };
-    can_msg.msg_id                = mid;
-    can_msg.frame_fields.data_len = dlc;
-    memcpy(can_msg.data.bytes, bytes, dlc);
+//bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
+//{
+//    can_msg_t can_msg = { 0 };
+//    can_msg.msg_id                = mid;
+//    can_msg.frame_fields.data_len = dlc;
+//    memcpy(can_msg.data.bytes, bytes, dlc);
+//
 
-    return CAN_tx(can1, &can_msg, 0);
-}
+//    return CAN_tx(can1, &can_msg, 0);
+//}
 
-CURRENT_t gps_current = {0,0,0,0};
-//Uart2& bluetooth = Uart2::getInstance();
-const uint32_t            CURRENT__MIA_MS = 3000;
-const CURRENT_t       CURRENT__MIA_MSG = {17, 17, 1, 0};
-
+Uart2& bluetooth = Uart2::getInstance();
 
 
 /// This is the stack size used for each of the period tasks (1Hz, 10Hz, 100Hz, and 1000Hz)
@@ -457,13 +462,10 @@ const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
 /// Called once before the RTOS is started, this is a good place to initialize things once
 bool period_init(void)
 {
-    CAN_init(can1,100, 100, 100, NULL, NULL);
-       CAN_bypass_filter_accept_all_msgs();
-       CAN_reset_bus(can1);
-
-   gps_current.mia_info.mia_counter_ms = 0;
-   gps_current.mia_info.is_mia = false;
-   // bluetooth.init(9600, 100, 100);
+//    CAN_init(can1,100, 10, 10, NULL, NULL);
+//       CAN_bypass_filter_accept_all_msgs();
+//       CAN_reset_bus(can1);
+    bluetooth.init(9600, 100, 100);
     return true; // Must return true upon success
 }
 
@@ -482,71 +484,111 @@ bool period_reg_tlm(void)
 
 void period_1Hz(uint32_t count)
 {
-   if (CAN_is_bus_off(can1))   CAN_reset_bus(can1);
-//    LE.toggle(1);
-//    char *c = new char[6];
-//    while(*c!='\0'){
-//        bluetooth.getChar(c);
-//        printf("%c", *c);
-//    }
+//    if (CAN_is_bus_off(can1))   CAN_reset_bus(can1);
+     LE.toggle(1);
+
+
+
+
+
 }
 
 void period_10Hz(uint32_t count)
 {
-//    int p = (int) TS.getCelsius();
-//    char data[15];
-//    sprintf(data, "%d", p);
-//    char *ptr = data;
-//    while (*ptr != '\0'){
-//        bluetooth.putChar(*ptr);
-//        ptr++;
-//    }
-//    bluetooth.putChar('\0');
 
 
 
-    DESTINATION_t gps_des = {0, 0};
-    //dbc_msg_hdr_t t
-    gps_des.LATITUDE_degrees = 20;
-    gps_des.LONGITUDE_degrees = 125;
 
-    if(dbc_encode_and_send_DESTINATION(&gps_des))
-    {
-
-    }
-            //u0_dbg_printf("\n Transmitted");
+//    char* c = "9";
+//    if(bluetooth.putChar(*c))
+//    u0_dbg_printf("\t transmit");
 
 
-    can_msg_t can_msg;
 
+    //LIGHT_READING_t light_reading;
+//        SENSE_LIGHT_t sense_light_cmd = { 0 };
+//        sense_light_cmd.do_work = 4;
+//
+//        if(dbc_encode_and_send_SENSE_LIGHT(&sense_light_cmd))
+//            u0_dbg_printf("Transmitted");
 
-    if(CAN_rx(can1, &can_msg, 0))
-    {
-        dbc_msg_hdr_t can_msg_hdr;
-        can_msg_hdr.mid = can_msg.msg_id;
-        can_msg_hdr.dlc = can_msg.frame_fields.data_len;
+    //    can_msg_t can_msg;
+    //    while(CAN_rx(can1, &can_msg, 0))
+    //    {
+    //        dbc_msg_hdr_t can_msg_hdr;
+    //        can_msg_hdr.mid = can_msg.msg_id;
+    //        can_msg_hdr.dlc = can_msg.frame_fields.data_len;
+    //
+    //        dbc_decode_LIGHT_READING(&light_reading, can_msg.data.bytes, &can_msg_hdr);
+    //
+    //        if(dbc_handle_mia_LIGHT_READING(&light_reading, 10))
 
-        dbc_decode_CURRENT(&gps_current, can_msg.data.bytes, &can_msg_hdr);
-          u0_dbg_printf("\n Received \n");
-          u0_dbg_printf("Lat = %d  ", can_msg.data.dwords[0]);
-          u0_dbg_printf("Long= %d  \n", can_msg.data.dwords[1]);
+        //            LE.on(2);
+    //    }
 
-    }
-    if(dbc_handle_mia_CURRENT(&gps_current, 10)){
-        u0_dbg_printf("LATITUDE mia =%x , LONGITUDE mia=%x \n", gps_current.CURRENT_latitude, gps_current.CURRENT_longitude);
-        LE.on(2);
-    }
     //LE.toggle(2);
 }
 
 void period_100Hz(uint32_t count)
 {
-//    LE.toggle(3);
+
+    //float p = TS.getCelsius();
+     float p1= 54.893241;
+     float p2 = -132.955443;
+
+     char s[50];
+     sprintf(s, "#%f@%f", p1, p2);
+     u0_dbg_printf("%s", s);
+
+     char *ptr = s;
+     while (*ptr != '\0'){
+         if(bluetooth.putChar(*ptr))
+         u0_dbg_printf("\n transmit");
+         ptr++;
+     }
+     bluetooth.putChar('\n');
+
+    char *c = new char[10];
+
+    if(bluetooth.getRxQueueSize() > 0)
+    {
+       bluetooth.getChar(c);
+     if(*c == '*')
+     {
+         bluetooth.getChar(c);
+         u0_dbg_printf("\n %c", *c);
+     }
+ }
+   // LE.toggle(3);
+//    char *c = new char[2];
+//    if(bluetooth.getRxQueueSize() > 0){
+//
+//           bluetooth.getChar(c);
+//           u0_dbg_printf("first %c",*c);
+//               if(*c=='*')
+//               {
+//                   bluetooth.getChar(c);
+//                   u0_dbg_printf("second %c",*c);
+//                 if(*c=='1')
+//                 {
+//                     u0_dbg_printf("3");
+//                       bluetooth.getChar(c);
+//
+//                     u0_dbg_printf("Receive data from android");
+//                     u0_dbg_printf("\n %c", *c);
+//
+//                 }
+//                 else if(*c == '0')
+//                 {
+//                      u0_dbg_printf("send message to driver to stop");
+//                 }
+//               }
+//           }
 }
 
 // 1Khz (1ms) is only run if Periodic Dispatcher was configured to run it at main():
 // scheduler_add_task(new periodicSchedulerTask(run_1Khz = true));
 void period_1000Hz(uint32_t count)
 {
-//    LE.toggle(4);
+    LE.toggle(4);
 }
