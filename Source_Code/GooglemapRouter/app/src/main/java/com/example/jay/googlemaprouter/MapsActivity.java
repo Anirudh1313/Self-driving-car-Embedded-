@@ -5,12 +5,16 @@ import com.example.jay.googlemaprouter.Bluetooth.*;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.jay.googlemaprouter.Map.MapCommands;
@@ -31,11 +35,12 @@ import java.util.UUID;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapClickListener{
 
+    boolean flag = true;
     private GoogleMap mMap;
-    ArrayList<BluetoothAdapter> array_adapter;
-    ArrayList<BluetoothDevice> ble_devices;
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+    BluetoothConnect bt_Thread;
+    BluetoothSocket mmSocket;
+    BluetoothCommunicate ble_communication;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        connect_alpha();
     }
 
 
@@ -75,6 +80,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SJSU,18));
        // mMap.moveCamera(CameraUpdateFactory.newLatLng(SJSU));
         initListeners();
+
+        final Button go_stop = (Button) findViewById(R.id.button1);
+        go_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                byte[] buffer = new byte[2];
+                if(flag)
+                {
+                    buffer = "*1".getBytes();
+                    ble_communication.write(buffer);
+                    go_stop.setText("STOP");
+                    flag = false;
+                }
+                else
+                {
+                    buffer = "*0".getBytes();
+                    ble_communication.write(buffer);
+                    go_stop.setText("GO");
+                    flag = true;
+                }
+
+
+            }
+        });
+
     }
 
 
@@ -91,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .fillColor(Color.parseColor("#FF1919")));
         mMap.addMarker(new MarkerOptions().position(SJSU).title("Marker in SJSU").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
-        //Toast.makeText(MapsActivity.this, "Latitude is: "+latLng.latitude+", Longtitude is: "+latLng.longitude, Toast.LENGTH_LONG).show();
+       // Toast.makeText(MapsActivity.this, "Latitude is: "+latLng.latitude+", Longtitude is: "+latLng.longitude, Toast.LENGTH_LONG).show();
         mMap.addMarker(new MarkerOptions().position(latLng).title("Destination"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
 
@@ -102,52 +132,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MapCommands mapCommands = new MapCommands();
         mapCommands.drowline(points,mMap);
 
-        connect_alpha();
+       // ble_communication.read();
+           byte[] buffer = new byte[24];
+            buffer = "#34.123456@-121.123456\n".getBytes();
+            ble_communication.write(buffer);
     }
-
 
     /*
     This function will add listener
      */
     private void initListeners() {
         mMap.setOnMapClickListener(this);
+
     }
 
 
 
     private void connect_alpha() {
-        BluetoothConnection bluetooth_conn = new BluetoothConnection(MapsActivity.this);
-        bluetooth_conn.bluethoot_enable();
-        UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-        //discover_device();
+       // bluethoot_enable();
+
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
-            Toast.makeText(MapsActivity.this, "Got Alpha " + device.getName(), Toast.LENGTH_LONG).show();
-           // Log.i("Alpha", "paired Device : " + device.getName());
             if (device.getName().equals("HC-05")) {
                 Log.i("Alpha", "got Alpha");
-                Toast.makeText(MapsActivity.this, "Got Alpha ", Toast.LENGTH_LONG).show();
-                BluetoothConnect bt_Thread = new BluetoothConnect();
 
-                Parcelable[] uuidExtra = (ParcelUuid[]) device.getUuids();
+              //  Parcelable[] uuidExtra = (ParcelUuid[]) device.getUuids();
 
                /* for (Parcelable Dev_uuid : uuidExtra) {
                     Log.i("UUID : ", Dev_uuid.toString());
                 }*/
-                boolean conn = bt_Thread.connect(device, MY_UUID);
-                Log.w("Blutooth connection ","Bluetooth connection status : "+conn);
-               /* try{
-                    bt_Thread.sendData(1);
-                }catch(Exception e)
-                {
-                    Log.w("Exception : ","Sending error"+e.toString());
-                }
+
+                bt_Thread = new BluetoothConnect(device,mBluetoothAdapter);
+                mmSocket = bt_Thread.get_socket();
+                bt_Thread.start();
+                Log.i("Bluetooth Socket", "Socket stored : "+mmSocket.toString());
+                ble_communication = new BluetoothCommunicate(mmSocket);
                 break;
             }
-        }*/
-            }
-
         }
+
     }
+
 
 }

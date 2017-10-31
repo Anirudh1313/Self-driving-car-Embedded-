@@ -18,7 +18,7 @@
         android:orientation="vertical"
         >
 
-        <TextView
+        <!--<TextView
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="30dip"
@@ -41,17 +41,17 @@
             android:labelFor="@+id/editText1"
             android:padding="2dip">
             <requestFocus/>
-        </EditText>
+        </EditText> -->
         <Button
             android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="30dip"
-            android:layout_toRightOf="@+id/editText1"
+            android:layout_width="match_parent"
+            android:layout_height="50dip"
             android:text=" Go "
+            android:background="#1313b6"
             android:textColor="#FFFFFF"
-            android:textSize="10sp"
-            android:background="#0bc9a8"
-            android:textStyle="bold"/>
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_alignParentBottom="true"/>
 
     </RelativeLayout>
 </RelativeLayout>
