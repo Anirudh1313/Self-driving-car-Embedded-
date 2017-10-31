@@ -1,0 +1,17 @@
+/*
+ * obstacle_avoidance.hpp
+ *
+ *  Created on: Oct 25, 2017
+ *      Author: Sucheta
+ */
+
+#ifndef L5_APPLICATION_OBSTACLE_AVOIDANCE_HPP_
+#define L5_APPLICATION_OBSTACLE_AVOIDANCE_HPP_
+
+#include "_can_dbc/generated_can.h"
+
+MOTOR_SIGNAL_t obstacle_avoidance(sensor_message_recd);
+
+
+
+#endif /* L5_APPLICATION_OBSTACLE_AVOIDANCE_HPP_ */

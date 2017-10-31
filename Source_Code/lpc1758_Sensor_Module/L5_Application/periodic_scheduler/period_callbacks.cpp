@@ -51,6 +51,7 @@
 
 /// This is the stack size used for each of the period tasks (1Hz, 10Hz, 100Hz, and 1000Hz)
 const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
+uint8_t DIST = 60;
 
 /**
  * This is the stack size of the dispatcher task that triggers the period tasks to run.
@@ -60,17 +61,17 @@ const uint32_t PERIOD_TASKS_STACK_SIZE_BYTES = (512 * 4);
 
 const uint32_t PERIOD_MONITOR_TASK_STACK_SIZE_BYTES = (512 * 3);
 //CAN communication
-can_t myCan = can2;
+//can_t myCan = can1;
 //POWER UP RIGHT and LEFT SENSOR -VCC
 GPIO vccRt(P0_0);
 GPIO vccLt(P0_1);
-//GPIO vccBk(0_29);
+//GPIO vccBk(P0_29);
 
 //init sensors
 sensor senMid(middle);
 sensor senLt(left);
 sensor senRt(right);
-//sensor senBk(back);
+sensor senBk(back);
 
 //next sensor to be triggered
 sensr next;
@@ -78,6 +79,10 @@ sensr next;
 void (*Mfptr) (void);
 void (*Rfptr) (void);
 void (*Lfptr) (void);
+void (*Bfptr) (void);
+
+can_msg_t senMsg;
+can_msg_t prevMsg;
 
 extern "C"
 {
@@ -93,10 +98,10 @@ void read_rightSensr_fe(void)
 {
     senRt.calculateDistance(right);
 }
-//void read_backSensr_fe(void)
-//{
-//    senBk.calculateDistance(right);
-//}
+void read_backSensr_fe(void)
+{
+    senBk.calculateDistance(back);
+}
 }
 
 /// Called once before the RTOS is started, this is a good place to initialize things once
@@ -104,35 +109,45 @@ bool period_init(void)
 {
 // first sensor to be triggered is next
     next = middle;
+
     //power up right
     vccRt.setAsOutput();
     vccRt.setHigh();
+
     //power up left
     vccLt.setAsOutput();
     vccLt.setHigh();
+
     //power up back
-//    vccBk.setAsOutput();
-//    vccBk.setHigh();
+   // vccBk.setAsOutput();
+  //  vccBk.setHigh();
+
     //power up delays
     senMid.powerUpDelay();
     senRt.powerUpDelay();
     senLt.powerUpDelay();
-//   senBk.powerUpDelay();
+    senBk.powerUpDelay();
+
     //interrupt callbacks
     Mfptr =&read_midSensr_fe;
     Rfptr =&read_rightSensr_fe;
     Lfptr =&read_leftSensr_fe;
-//    Bfptr = &read_backSensr_fe;
+    Bfptr = &read_backSensr_fe;
     //enable falling edge interrupts
     senMid.enableFEdge(Mfptr);
     senLt.enableFEdge(Lfptr);
     senRt.enableFEdge(Rfptr);
-//    senBk.enableFEdge(Bfptr);
+    senBk.enableFEdge(Bfptr);
+    //LEDS to indicate obstacles
+    LE.set(1,0);
+    LE.set(2,0);
+    LE.set(3,0);
+    LE.set(4,0);
 
     //init Can
-    CAN_init(myCan,100,10,10,NULL,NULL);
-    //reset the can bus
-    CAN_reset_bus(myCan);
+//    CAN_init(myCan,100,10,10,NULL,NULL);
+//    //reset the can bus
+//    CAN_reset_bus(myCan);
     return true; // Must return true upon success
 }
 
@@ -145,8 +160,8 @@ bool period_reg_tlm(void)
 
 void period_1Hz(uint32_t count)
 {
-    if(CAN_is_bus_off(can2))
-          CAN_reset_bus(can2);
+//    if(CAN_is_bus_off(myCan))
+//          CAN_reset_bus(myCan);
 }
 
 void period_10Hz(uint32_t count) //100ms
@@ -156,52 +171,86 @@ void period_10Hz(uint32_t count) //100ms
 
 bool dbc_app_send_can_msg(uint32_t mid, uint8_t dlc, uint8_t bytes[8])
 {
-    can_msg_t can_msg = { 0 };
-    can_msg.msg_id= mid;
-    can_msg.frame_fields.data_len = dlc;
-    memcpy(can_msg.data.bytes, bytes, dlc);
-    return CAN_tx(can2, &can_msg, 0);
+//    can_msg_t can_msg = { 0 };
+//    can_msg.msg_id= mid;
+//    can_msg.frame_fields.data_len = dlc;
+//    memcpy(can_msg.data.bytes, bytes, dlc);
+//    bool sent = CAN_tx(myCan, &can_msg, 0);
+//    //u0_dbg_printf("%d",sent);
+//    return sent;
 }
 
 void period_100Hz(uint32_t count)  //10ms
 {
+//	if(count%6 == 0)
+//	senBk.commandRanging();
+//	bool distinct = false;
     if(count%6 == 0)
     {
         if(next == middle)
         {
             senMid.commandRanging();
+            if(senMid.distance < DIST)
+            	LE.set(1,1);
+            else
+            	LE.set(1,0);
             next = right;
         }
         else if(next == right)
         {
             senRt.commandRanging();
+			if (senRt.distance < DIST)
+				LE.set(2,1);
+			else
+				LE.set(2,0);
             next = left;
         }
         else if(next == left)
         {
             senLt.commandRanging();
-            next = middle;
- //           next = back;
-//            sending the CAN message
-            SENSOR_SONARS_t sen_msg = { 0 };
-
-            sen_msg.SENSOR_SONARS_middle = (uint16_t)senMid.distance;
-            sen_msg.SENSOR_SONARS_left =  (uint16_t)senLt.distance;
-            sen_msg.SENSOR_SONARS_right = (uint16_t)senRt.distance;
-            sen_msg.SENSOR_SONARS_rear = 0;
-            // This function will encode the CAN data bytes, and send the CAN msg using dbc_app_send_can_msg()
-            dbc_encode_and_send_SENSOR_SONARS(&sen_msg);
-        }
+			if (senLt.distance < DIST)
+				LE.set(3,1);
+			else
+				LE.set(3,0);
+            next = back;
+       }
         else if(next == back)
         {
-//             senBk.commandRanging();
-//             next = middle;
+             senBk.commandRanging();
+        	 if(senBk.distance < DIST)
+        	     LE.set(4,1);
+        	 else
+        	     LE.set(4,0);
+        	 next = middle;
+//        	            sending the CAN message
+//        				for (int i = 0; i < 8; i++) {
+//        					prevMsg.data.bytes[i]=senMsg.data.bytes[i];
+//        				}
+//        	            SENSOR_SONARS_t sen_msg = { 0 };
+
+//        	            sen_msg.SENSOR_SONARS_middle = (uint16_t)senMid.distance;
+//        	            sen_msg.SENSOR_SONARS_left =   (uint16_t)senLt.distance;
+//        	            sen_msg.SENSOR_SONARS_right =  (uint16_t)senRt.distance;
+//        	            sen_msg.SENSOR_SONARS_rear =   (uint16_t)senRt.distance;
+        	            // This function will encode the CAN data bytes, and send the CAN msg using dbc_app_send_can_msg()
+//        	            dbc_encode_and_send_SENSOR_SONARS(&sen_msg);
+//        	            code to send distinct messages
+//        	            dbc_encode_SENSOR_SONARS(senMsg.data.bytes,&sen_msg);
+//        	            for(int i=0;i<8;i++)
+//        	            {
+//        	            	if( prevMsg.data.bytes[i]!=senMsg.data.bytes[i])
+//        	            	{
+//        	            		distinct = true;
+//        	            		break;
+//        	            	}
+//        	            }
+//        	            if(distinct)
+//        	            	CAN_tx(myCan,&senMsg,10);
+
 
 
         }
     }
-
-
 
 }
 
