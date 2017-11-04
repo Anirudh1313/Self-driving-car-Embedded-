@@ -1,6 +1,0 @@
-14:32:56 **** Clean-only build of configuration _build for project lpc1758_GPS_Module ****
-make -j2 clean 
-make: *** No rule to make target `clean'.  Stop.
-
-14:32:56 Build Finished (took 409ms)
-

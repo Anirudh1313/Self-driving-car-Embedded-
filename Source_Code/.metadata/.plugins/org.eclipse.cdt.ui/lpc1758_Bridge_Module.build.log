@@ -1,6 +1,0 @@
-16:06:57 **** Clean-only build of configuration _build for project lpc1758_Bridge_Module ****
-make -j2 clean 
-make: *** No rule to make target `clean'.  Stop.
-
-16:07:01 Build Finished (took 4s.389ms)
-
