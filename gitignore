@@ -1,4 +1,9 @@
 Source_Code/.metadata/*
 Packages/*
+Source_Code/lpc1758_Bridge_Module/.settings/*
+Source_Code/lpc1758_GPS_Module/.settings/*
+Source_Code/lpc1758_Master_Module/.settings/*
+Source_Code/lpc1758_Motor_Module/.settings/*
+Source_Code/lpc1758_Sensor_Module/.settings/*
 *.ini
 *.index
