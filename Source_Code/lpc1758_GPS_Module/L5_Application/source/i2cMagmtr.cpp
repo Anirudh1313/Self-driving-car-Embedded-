@@ -2,7 +2,7 @@
  * i2cMagmtr.cpp
  *
  *  Created on: Nov 4, 2017
- *      Author: sushm
+ *      Author: krish
  */
 #include "i2cMagmtr.h"
 #include "i2c2.hpp"
