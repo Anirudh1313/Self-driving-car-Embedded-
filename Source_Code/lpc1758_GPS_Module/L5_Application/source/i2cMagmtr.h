@@ -2,7 +2,7 @@
  * i2cMagmtr.h
  *
  *  Created on: Nov 4, 2017
- *      Author: sushm
+ *      Author: krish
  */
 
 #ifndef L5_APPLICATION_PERIODIC_SCHEDULER_I2CMAGMTR_H_
