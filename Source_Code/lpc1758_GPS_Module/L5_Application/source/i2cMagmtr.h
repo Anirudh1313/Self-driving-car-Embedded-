@@ -13,6 +13,7 @@ class i2cMagmtr {
 public:
 	i2cMagmtr();
 	bool getData(uint16_t &Z);
+	
 	//bool getData(int &Z);
 	void calibrate();
 	void calibrate_stop();
